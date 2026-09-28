@@ -3,9 +3,9 @@ Ett program som hanterar en samling simulerade servrar. Programmet låter använ
 lägga till och ta bort servrar från samlingen samt kontrollera en servers status och hälsa.
 
 # Superklass
-•	Namn: Server
-•	Gemensamma fält: IP-adress, port, isRunning
-•	Gemensamma metoder: setServerStatus, pingAddress, checkHealth
+- Namn: Server
+- Gemensamma fält: IP-adress, port, isRunning
+- Gemensamma metoder: setServerStatus, pingAddress, checkHealth
 
 # Subklasser (minst tre)
 1.	EmailServer – overridar checkHealth för att kontrollera hur många köade emails som finns
@@ -13,9 +13,9 @@ lägga till och ta bort servrar från samlingen samt kontrollera en servers stat
 3.	DatabaseServer — overridar checkHealth för att även kontrollera hur många ytterligare anslutningar databasservern kan hantera
    
 # Interface
-•	Namn: Monitorable
-•	Metod(er): monitor (samlar och skriver ut info om servern)
-•	Implementeras av (minst två subklasser): EmailServer, BackupServer, DatabaseServer
+- Namn: Monitorable
+- Metod(er): monitor (samlar och skriver ut info om servern)
+- Implementeras av (minst två subklasser): EmailServer, BackupServer, DatabaseServer
 
 # Meny
 1.	Add server
