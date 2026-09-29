@@ -1,8 +1,9 @@
-package Server;
+package server;
 
 /*
- * Server - the superclass
+ * Server - the superclass.
  */
+
 public class Server {
 
     private String ipAddress;
@@ -15,7 +16,6 @@ public class Server {
         this.isRunning = isRunning;
     }
 
-    //Getters for IP-adress, port and server-status.
     public String getIpAddress() {
         return ipAddress;
     }
@@ -48,6 +48,6 @@ public class Server {
 
     //Simulates if the server is healthy.
     public void checkHealth() {
-        System.out.println("This server is currently " + (getIsRunning() ? "ONLINE" : "OFFLINE"));
+        System.out.println("Running health diagnostic for " + getIpAddress() + " on port " + getPort());
     }
 }
