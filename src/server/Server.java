@@ -4,7 +4,7 @@ package server;
  * Server - the superclass.
  */
 
-public class Server {
+public abstract class Server {
 
     private String ipAddress;
     private int port;
@@ -46,8 +46,12 @@ public class Server {
         }
     }
 
+    //Returns the server type as a string.
+    public abstract String getServerType();
+
     //Simulates if the server is healthy.
     public void checkHealth() {
         System.out.println("Running health diagnostic for " + getIpAddress() + " on port " + getPort());
     }
+
 }

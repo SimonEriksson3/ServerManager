@@ -2,6 +2,9 @@ package server;
 
 import java.util.Random;
 
+/*
+ * Represents a database server, handling database-specific monitoring like active connections.
+ */
 public class DatabaseServer extends Server implements Monitorable {
 
     //The maximum number of connections the database-server is able to handle.
@@ -29,6 +32,12 @@ public class DatabaseServer extends Server implements Monitorable {
         return maxConnections;
     }
 
+    //Returns the server type as string.
+    @Override
+    public String getServerType() {
+        return "Database server";
+    }
+
     //Overrides the checkHealth() method from the superclass.
     //This version of the method will also check how many additional connections the database-server can handle.
     @Override
@@ -39,7 +48,6 @@ public class DatabaseServer extends Server implements Monitorable {
             System.out.println("CRITICAL: Database server is unreachable!");
             return;
         }
-
 
         //Checks if connection pool is reaching its limit.
         int availableConnections = getMaxConnections() - getCurrentConnections();
@@ -63,10 +71,12 @@ public class DatabaseServer extends Server implements Monitorable {
         String serverLoad = String.format("%.0f", loadPercentage) + "%";
 
         System.out.println("=== Database Server Telemetry ===");
+        System.out.println("IP-address          : " + getIpAddress());
+        System.out.println("Port                : " + getPort());
         System.out.println("Status              : " + (getIsRunning() ? "ONLINE" : "OFFLINE"));
         System.out.println("Active connections  : " + (getIsRunning() ? activeConnections : "N/A"));
         System.out.println("Available slots     : " + (getIsRunning() ? availableConnections : "N/A"));
         System.out.println("Server load         : " + (getIsRunning() ? serverLoad : "N/A"));
-        System.out.println("=================================");
+        System.out.println("---------------------------------");
     }
 }

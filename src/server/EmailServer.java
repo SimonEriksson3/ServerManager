@@ -3,7 +3,7 @@ package server;
 import java.util.Random;
 
 /*
- * Subclass EmailServer which represents an Email-Server.
+ * Represents an email server that implements specific email telemetry.
  */
 public class EmailServer extends Server implements Monitorable{
 
@@ -27,6 +27,12 @@ public class EmailServer extends Server implements Monitorable{
 
     public int getMaxQueuedEmails() {
         return maxQueuedEmails;
+    }
+
+    //Returns the server type as string.
+    @Override
+    public String getServerType() {
+        return "Email server";
     }
 
     //Overrides the checkHealth() method from the superclass.
@@ -59,13 +65,15 @@ public class EmailServer extends Server implements Monitorable{
 
         //Telemetry.
         System.out.println("=== Email Server Telemetry ===");
-        System.out.println("Status          : " + (getIsRunning() ? "ONLINE" : "OFFLINE"));
+        System.out.println("IP-address          : " + getIpAddress());
+        System.out.println("Port                : " + getPort());
+        System.out.println("Status              : " + (getIsRunning() ? "ONLINE" : "OFFLINE"));
 
         //Conditional to display telemetry based on server status.
-        System.out.println("Queue load      : " + (getIsRunning() ? queueLoad : "N/A"));
-        System.out.println("Capacity used   : " + (getIsRunning() ? capacityUsed : "N/A"));
-        System.out.println("Est. Flush Time : " + (getIsRunning() ? emailFlushTime + " seconds" : "N/A"));
+        System.out.println("Queue load          : " + (getIsRunning() ? queueLoad : "N/A"));
+        System.out.println("Capacity used       : " + (getIsRunning() ? capacityUsed : "N/A"));
+        System.out.println("Est. Flush Time     : " + (getIsRunning() ? emailFlushTime + " seconds" : "N/A"));
 
-        System.out.println("==============================");
+        System.out.println("------------------------------");
     }
 }
