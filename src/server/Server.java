@@ -54,4 +54,31 @@ public abstract class Server {
         System.out.println("Running health diagnostic for " + getIpAddress() + " on port " + getPort());
     }
 
+    /*
+     * Checks if a string corresponds to a valid IP-address.
+     */
+    public static boolean isValidIpv4 (String ip) {
+        String[] parts = ip.split("\\."); //Split into 4 parts
+
+        if (parts.length != 4) {
+            return false;
+        }
+
+        try {
+            for (String part : parts) {
+                //Prevents leading zeros to avoid invalid formatting.
+                if (part.length() > 1 && part.startsWith("0")) {
+                    return false;
+                }
+
+                int value = Integer.parseInt(part);
+                if (value < 0 || value > 255) {
+                    return false;
+                }
+            }
+            return true;
+        } catch (NumberFormatException e) {
+            return false;
+        }
+    }
 }

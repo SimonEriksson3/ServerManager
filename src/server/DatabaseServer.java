@@ -17,8 +17,8 @@ public class DatabaseServer extends Server implements Monitorable {
     //Random used to simulate a number of current connections.
     private Random rand = new Random();
 
-    public DatabaseServer(String ipAddress, int port, boolean isRunning, int maxConnections) {
-        super(ipAddress, port, isRunning);
+    public DatabaseServer(String ipAddress, int port, boolean getIsRunning, int maxConnections) {
+        super(ipAddress, port, getIsRunning);
         this.maxConnections = maxConnections;
         //Sets a random amount of current simulated connections.
         this.currentConnections = rand.nextInt(1, maxConnections + 1);

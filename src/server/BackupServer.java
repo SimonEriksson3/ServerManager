@@ -15,8 +15,8 @@ public class BackupServer extends Server implements Monitorable{
     //Random used to assign a random value to the hasActiveBackup-boolean, for simulation purposes.
     private Random rand = new Random();
 
-    public BackupServer(String ipAddress, int port, boolean isRunning) {
-        super(ipAddress, port, isRunning);
+    public BackupServer(String ipAddress, int port, boolean getIsRunning) {
+        super(ipAddress, port, getIsRunning);
         //Assigns random simulated values.
         this.hasActiveBackup = rand.nextBoolean();
 
