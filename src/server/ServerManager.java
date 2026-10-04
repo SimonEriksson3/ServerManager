@@ -60,8 +60,10 @@ public class ServerManager {
                 case 3:
                     break;
                 case 4:
+                    startServer();
                     break;
                 case 5:
+                    stopServer();
                     break;
                 case 6:
                     break;
@@ -116,13 +118,39 @@ public class ServerManager {
     }
 
     public void startServer() {
+        Server chosenServer = selectServer("Enter the specific server you want to start: ");
+        if (chosenServer != null) {
+            if (chosenServer.getIsRunning()) {
+                System.out.println("Server is already running.");
+            } else {
+                chosenServer.setServerStatus(true);
+            }
+        }
+        promptEnterKey();
+    }
 
+    public void stopServer() {
+        Server chosenServer = selectServer("Enter the specific server you want to stop: ");
+        if (chosenServer != null) {
+            if (!chosenServer.getIsRunning()) {
+                System.out.println("Server is already stopped.");
+            } else {
+                chosenServer.setServerStatus(false);
+            }
+        }
+        promptEnterKey();
     }
 
     /*
      * Allows the user to monitor all the servers or a specific server chosen from a list.
      */
     public void monitorServers() {
+        if (servers.isEmpty()) {
+            System.out.println("There are currently no servers available.");
+            promptEnterKey();
+            return;
+        }
+
         System.out.println("\n--- MONITOR SERVERS ---");
         System.out.println("\t1. Monitor all servers");
         System.out.println("\t2. Monitor specific server");
@@ -141,11 +169,6 @@ public class ServerManager {
                 break;
 
             case 2:
-                if (servers.isEmpty()) {
-                    System.out.println("No servers available to monitor.");
-                    break;
-                }
-
                 listAllServers();
                 int serverChoice = getUserChoice("Enter the specific server you want to monitor: ", 1, servers.size());
 
@@ -201,15 +224,19 @@ public class ServerManager {
         }
     }
 
-     //Prompts the user for a valid server port.
+    //Prompts the user for a valid server port.
     private int getValidPort() {
         return getUserChoice("Enter port (1-65535): ", 1, 65535);
     }
 
     //Used only for displaying all servers
     public void displayAllServers() {
-        for (Server server : servers) {
-            System.out.println(server.getServerType() + ": " + server.getIpAddress() + ":" + server.getPort());
+        if (servers.isEmpty()) {
+            System.out.println("There are currently no servers available.");
+        } else {
+            for (Server server : servers) {
+                System.out.println(server.getServerType() + ": " + server.getIpAddress() + ":" + server.getPort());
+            }
         }
         promptEnterKey();
     }
@@ -222,5 +249,16 @@ public class ServerManager {
             Server s = servers.get(i);
             System.out.println("\t" + (i + 1) + ". " + s.getServerType() + " - " + s.getIpAddress() + ":" + s.getPort());
         }
+    }
+
+    private Server selectServer(String prompt) {
+        if (servers.isEmpty()) {
+            System.out.println("There are currently no servers available.");
+            return null;
+        }
+
+        listAllServers();
+        int choice = getUserChoice(prompt, 1, servers.size());
+        return servers.get(choice - 1);
     }
 }
