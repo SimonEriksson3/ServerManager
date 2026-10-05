@@ -32,6 +32,9 @@ public class ServerManager {
         System.out.println("ServerManager initialized with " + servers.size() + " servers.");
     }
 
+    /*
+     * Starts the main loop, allowing the user to interact with the menu.
+     */
     public void run() {
         while (isRunning) {
             System.out.println("========================================");
@@ -83,7 +86,7 @@ public class ServerManager {
     /*
      * Adds a server to the collection.
      */
-    public void addServer() {
+    private void addServer() {
         System.out.println("\n--- ADD SERVER ---");
         System.out.println("What kind of server would you like to add?");
         System.out.println("\t1. Backup server");
@@ -91,7 +94,14 @@ public class ServerManager {
         System.out.println("\t3. Email server");
 
         //Get server type.
-        int choice = getUserChoice("Enter your choice (1-3): ", 1, 3);
+        int choice = getUserChoice("Enter your choice (1-3): ", 1, 3, true);
+
+        //If canceled.
+        if (choice == 0) {
+            System.out.println("Adding server canceled.");
+            promptEnterKey();
+            return;
+        }
 
         //Get the data that all servers share.
         String ip = getValidIpAddress();
@@ -117,8 +127,8 @@ public class ServerManager {
         promptEnterKey();
     }
 
-    public void startServer() {
-        Server chosenServer = selectServer("Enter the specific server you want to start: ");
+    private void startServer() {
+        Server chosenServer = selectServer("Enter the specific server you want to start (0 to cancel): ");
         if (chosenServer != null) {
             if (chosenServer.getIsRunning()) {
                 System.out.println("Server is already running.");
@@ -129,8 +139,8 @@ public class ServerManager {
         promptEnterKey();
     }
 
-    public void stopServer() {
-        Server chosenServer = selectServer("Enter the specific server you want to stop: ");
+    private void stopServer() {
+        Server chosenServer = selectServer("Enter the specific server you want to stop (0 to cancel): ");
         if (chosenServer != null) {
             if (!chosenServer.getIsRunning()) {
                 System.out.println("Server is already stopped.");
@@ -144,7 +154,7 @@ public class ServerManager {
     /*
      * Allows the user to monitor all the servers or a specific server chosen from a list.
      */
-    public void monitorServers() {
+    private void monitorServers() {
         if (servers.isEmpty()) {
             System.out.println("There are currently no servers available.");
             promptEnterKey();
@@ -155,7 +165,13 @@ public class ServerManager {
         System.out.println("\t1. Monitor all servers");
         System.out.println("\t2. Monitor specific server");
 
-        int choice = getUserChoice("Enter your choice (1-2): ", 1, 2);
+        int choice = getUserChoice("Enter your choice (1-2 or 0 to cancel): ", 1, 2, true);
+
+        if (choice == 0) {
+            System.out.println("Monitoring canceled.");
+            promptEnterKey();
+            return;
+        }
 
         switch (choice) {
             case 1:
@@ -169,35 +185,46 @@ public class ServerManager {
                 break;
 
             case 2:
-                listAllServers();
-                int serverChoice = getUserChoice("Enter the specific server you want to monitor: ", 1, servers.size());
-
-                Server selectedServer = servers.get(serverChoice - 1);
-                if (selectedServer instanceof Monitorable m) {
-                    System.out.println();
-                    m.monitor();
-                } else {
-                    System.out.println("This server is not monitorable.");
+                Server selectedServer = selectServer("Enter the specific server you want to monitor (0 to cancel): ");
+                if (selectedServer != null) {
+                    if (selectedServer instanceof Monitorable m) {
+                        System.out.println();
+                        m.monitor();
+                    } else {
+                        System.out.println("This server is not monitorable.");
+                    }
                 }
                 break;
         }
         promptEnterKey();
     }
 
+    private int getUserChoice(String prompt, int min, int max) {
+        return getUserChoice(prompt, min, max, false);
+    }
+
     /*
      * Handles user input safely and prompts the user continuously until a valid integer between the specified range is entered.
      */
-    private int getUserChoice(String prompt, int min, int max) {
+    private int getUserChoice(String prompt, int min, int max, boolean allowCancel) {
         while (true) {
             System.out.print(prompt);
 
             try {
                 int choice = Integer.parseInt(scanner.nextLine());
 
+                //0 to cancel.
+                if (allowCancel && choice == 0) {
+                    return 0;
+                }
                 if (choice >= min && choice <= max) {
                     return choice;
                 } else {
-                    System.out.println("Invalid choice. Please enter a number between " + min + " and " + max + ".");
+                    if (max == 1) {
+                        System.out.println("Invalid choice. There is only option " + min + " available" + (allowCancel ? " (0 to cancel)." : "."));
+                    } else {
+                        System.out.println("Invalid choice. Please enter a number between " + min + " and " + max + (allowCancel ? " (0 to cancel)." : "."));
+                    }
                 }
             } catch (NumberFormatException e) {
                 System.out.println("Invalid input. Please enter a valid number.");
@@ -205,6 +232,7 @@ public class ServerManager {
         }
     }
 
+    //Pauses the program and waits for the user to press enter before continuing.
     private void promptEnterKey() {
         System.out.println("\nPress \"ENTER\" to return to main menu...");
         scanner.nextLine();
@@ -230,7 +258,7 @@ public class ServerManager {
     }
 
     //Used only for displaying all servers
-    public void displayAllServers() {
+    private void displayAllServers() {
         if (servers.isEmpty()) {
             System.out.println("There are currently no servers available.");
         } else {
@@ -242,7 +270,7 @@ public class ServerManager {
     }
 
     //Used when listing servers with an index for user selection.
-    public void listAllServers() {
+    private void listAllServers() {
         //Lists all the available servers.
         System.out.println("\n--- AVAILABLE SERVERS ---");
         for (int i = 0; i < servers.size(); i++) {
@@ -251,6 +279,10 @@ public class ServerManager {
         }
     }
 
+    /*
+     * Lists all available servers and allows the user to select one.
+     * Returns the chosen server object or null if the action is canceled.
+     */
     private Server selectServer(String prompt) {
         if (servers.isEmpty()) {
             System.out.println("There are currently no servers available.");
@@ -258,7 +290,11 @@ public class ServerManager {
         }
 
         listAllServers();
-        int choice = getUserChoice(prompt, 1, servers.size());
+        int choice = getUserChoice(prompt, 1, servers.size(), true);
+        if (choice == 0) {
+            System.out.println("Selecting server canceled.");
+            return null;
+        }
         return servers.get(choice - 1);
     }
 }
