@@ -69,6 +69,7 @@ public class ServerManager {
                     stopServer();
                     break;
                 case 6:
+                    checkHealth();
                     break;
                 case 7:
                     monitorServers();
@@ -81,6 +82,20 @@ public class ServerManager {
                     break;
             }
         }
+    }
+
+    private void checkHealth() {
+        System.out.println("\n--- CHECK HEALTH ---");
+
+        ArrayList<Server> selectedServers = selectAllOrOne("Run check health for");
+
+        if (selectedServers != null) {
+            for (Server server : selectedServers) {
+                System.out.println();
+                server.checkHealth();
+            }
+        }
+        promptEnterKey();
     }
 
     /*
