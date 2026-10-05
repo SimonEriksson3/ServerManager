@@ -128,83 +128,72 @@ public class ServerManager {
     }
 
     private void startServer() {
-        Server chosenServer = selectServer("Enter the specific server you want to start (0 to cancel): ");
-        if (chosenServer != null) {
-            if (chosenServer.getIsRunning()) {
-                System.out.println("Server is already running.");
-            } else {
-                chosenServer.setServerStatus(true);
+        System.out.println("\n--- START SERVERS ---");
+
+        ArrayList<Server> selectedServers = selectAllOrOne("Start");
+
+        if (selectedServers != null) {
+            for (Server server : selectedServers) {
+                if (server.getIsRunning()) {
+                    System.out.println(server.getServerType() + " (" + server.getIpAddress() + ") is already running.");
+                } else {
+                    server.setServerStatus(true);
+                }
             }
         }
         promptEnterKey();
     }
 
     private void stopServer() {
-        Server chosenServer = selectServer("Enter the specific server you want to stop (0 to cancel): ");
-        if (chosenServer != null) {
-            if (!chosenServer.getIsRunning()) {
-                System.out.println("Server is already stopped.");
-            } else {
-                chosenServer.setServerStatus(false);
+        System.out.println("\n--- STOP SERVERS ---");
+
+        ArrayList<Server> selectedServers = selectAllOrOne("Stop");
+
+        if (selectedServers != null) {
+            for (Server server : selectedServers) {
+                if (!server.getIsRunning()) {
+                    System.out.println(server.getServerType() + " (" + server.getIpAddress() + ") is already stopped.");
+                } else {
+                    server.setServerStatus(false);
+                }
+            }
+        }
+        promptEnterKey();
+    }
+
+
+    /*
+     * Allows the user to monitor all the servers or a specific server chosen from a list.
+     */
+    private void monitorServers() {
+        System.out.println("\n--- MONITOR SERVERS ---");
+
+        ArrayList<Server> selectedServers = selectAllOrOne("Monitor");
+
+        if (selectedServers != null) {
+            for (Server server : selectedServers) {
+                //Checks if the server implements the Monitorable interface and executes its monitor implementation.
+                if (server instanceof Monitorable m) {
+                    System.out.println();
+                    m.monitor();
+                } else {
+                    System.out.println(server.getServerType() + " (" + server.getIpAddress() + ") is not monitorable.");
+                }
             }
         }
         promptEnterKey();
     }
 
     /*
-     * Allows the user to monitor all the servers or a specific server chosen from a list.
+     * Overloaded version of getUserChoice that defaults to not allowing cancellation.
      */
-    private void monitorServers() {
-        if (servers.isEmpty()) {
-            System.out.println("There are currently no servers available.");
-            promptEnterKey();
-            return;
-        }
-
-        System.out.println("\n--- MONITOR SERVERS ---");
-        System.out.println("\t1. Monitor all servers");
-        System.out.println("\t2. Monitor specific server");
-
-        int choice = getUserChoice("Enter your choice (1-2 or 0 to cancel): ", 1, 2, true);
-
-        if (choice == 0) {
-            System.out.println("Monitoring canceled.");
-            promptEnterKey();
-            return;
-        }
-
-        switch (choice) {
-            case 1:
-                for (Server server : servers) {
-                    //Checks if the server implements the Monitorable interface and executes its monitor implementation
-                    if (server instanceof Monitorable m) {
-                        System.out.println(); //Empty line to separate each server's telemetry.
-                        m.monitor();
-                    }
-                }
-                break;
-
-            case 2:
-                Server selectedServer = selectServer("Enter the specific server you want to monitor (0 to cancel): ");
-                if (selectedServer != null) {
-                    if (selectedServer instanceof Monitorable m) {
-                        System.out.println();
-                        m.monitor();
-                    } else {
-                        System.out.println("This server is not monitorable.");
-                    }
-                }
-                break;
-        }
-        promptEnterKey();
-    }
-
     private int getUserChoice(String prompt, int min, int max) {
         return getUserChoice(prompt, min, max, false);
     }
 
     /*
      * Handles user input safely and prompts the user continuously until a valid integer between the specified range is entered.
+     * If allowCancel is true the user can also enter 0 to cancel the operation.
      */
     private int getUserChoice(String prompt, int min, int max, boolean allowCancel) {
         while (true) {
@@ -257,7 +246,7 @@ public class ServerManager {
         return getUserChoice("Enter port (1-65535): ", 1, 65535);
     }
 
-    //Used only for displaying all servers
+    //Used only for displaying all servers.
     private void displayAllServers() {
         if (servers.isEmpty()) {
             System.out.println("There are currently no servers available.");
@@ -296,5 +285,46 @@ public class ServerManager {
             return null;
         }
         return servers.get(choice - 1);
+    }
+
+    /*
+     * Allows the selection of all servers or a specific server.
+     * Used to perform a specific action on selected servers.
+     * Returns null if the user cancels the selection.
+     */
+    private ArrayList<Server> selectAllOrOne(String action) {
+        if (servers.isEmpty()) {
+            System.out.println("There are currently no servers available.");
+            return null;
+        }
+
+        ArrayList<Server> selectedServers = new ArrayList<>();
+
+        System.out.println("\t1. " + action + " specific server.");
+        System.out.println("\t2. " + action + " all servers.");
+
+        int choice = getUserChoice("Enter your choice (1-2 or 0 to cancel): ", 1, 2, true);
+
+        if (choice == 0) {
+            System.out.println("Selection canceled.");
+            return null;
+        }
+
+        switch (choice) {
+            case 1:
+                Server s = selectServer("Enter the specific server you want to " + action.toLowerCase() + ": ");
+                //If selectServer is canceled = return null.
+                if (s == null) {
+                    return null;
+                }
+                selectedServers.add(s);
+                break;
+            case 2:
+                //Copy all servers to temporary selectedServers list.
+                selectedServers.addAll(servers);
+                break;
+        }
+
+        return selectedServers;
     }
 }
