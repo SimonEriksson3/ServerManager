@@ -61,6 +61,7 @@ public class ServerManager {
                     addServer();
                     break;
                 case 3:
+                    pingServer();
                     break;
                 case 4:
                     startServer();
@@ -82,6 +83,20 @@ public class ServerManager {
                     break;
             }
         }
+    }
+
+    private void pingServer() {
+        System.out.println("\n--- PING SERVER ---");
+
+        ArrayList<Server> selectedServers = selectAllOrOne("Ping");
+
+        if (selectedServers != null) {
+            for (Server server : selectedServers) {
+                System.out.println();
+                server.ping();
+            }
+        }
+        promptEnterKey();
     }
 
     private void checkHealth() {

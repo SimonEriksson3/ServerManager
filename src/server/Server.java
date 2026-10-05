@@ -31,7 +31,7 @@ public abstract class Server {
     //This method sets the status of the server, whether it should run or not.
     public void setServerStatus(boolean isRunning) {
         this.isRunning = isRunning;
-        System.out.println("This server is now " + (getIsRunning() ? "ONLINE" : "OFFLINE"));
+        System.out.println(getServerType() + " (" + getIpAddress() + ") is now " + (getIsRunning() ? "ONLINE" : "OFFLINE"));
     }
 
     //Simulates pinging the address to check if there's a currently working connection.
@@ -51,13 +51,34 @@ public abstract class Server {
 
     //Simulates if the server is healthy.
     public void checkHealth() {
-        System.out.println("Running health diagnostic for " + getIpAddress() + " on port " + getPort());
+        System.out.println("Running health diagnostic for " + getIpAddress() + " on port " + getPort() + ".");
+    }
+
+    //Simulates pinging the server.
+    public void ping() {
+        System.out.println("Pinging " + getServerType() + " at " + getIpAddress() + "...");
+        sleep();
+
+        if (!getIsRunning()) {
+            System.out.println("Request timed out. Server is offline");
+            return;
+        }
+
+        int latency = (int) (Math.random() * 42) + 4; //Random latency between 4-45ms
+        System.out.println("Reply from " + getIpAddress() + ": time=" + latency + "ms TTL=64");
+    }
+
+    private void sleep() {
+        try {
+            Thread.sleep(500);
+        } catch (InterruptedException e) {
+        }
     }
 
     /*
      * Checks if a string corresponds to a valid IP-address.
      */
-    public static boolean isValidIpv4 (String ip) {
+    public static boolean isValidIpv4(String ip) {
         String[] parts = ip.split("\\."); //Split into 4 parts
 
         if (parts.length != 4) {
