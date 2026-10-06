@@ -160,6 +160,12 @@ public class ServerManager {
         String ip = getValidIpAddress();
         int port = getValidPort();
 
+        if (isServerDuplicate(ip, port)) {
+            System.out.println("Error: A server with the address " + ip + ":" + port + " is already registered in the system.");
+            promptEnterKey();
+            return;
+        }
+
         //Create the specific server object based on user input.
         switch (choice) {
             case 1:
@@ -274,6 +280,16 @@ public class ServerManager {
         }
     }
 
+    //Checks if a server with the same IP-address and port already exist in the collection.
+    private boolean isServerDuplicate(String ip, int port) {
+        for (Server server : servers) {
+            if (server.getIpAddress().equals(ip) && server.getPort() == port) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     //Prompts the user for a yes/no confirmation and loops until a valid input is received.
     private boolean getConfirmation(String promptMessage) {
         while (true) {
@@ -306,7 +322,7 @@ public class ServerManager {
             if (Server.isValidIpv4(ip)) {
                 return ip;
             } else {
-                System.out.println("Invalid IP-address. Please use the format X.X.X.X (192.168.0.1 for example).");
+                System.out.println("Invalid IP-address. Please use the format X.X.X.X (192.168.1.50 for example).");
             }
         }
     }
