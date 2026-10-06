@@ -1,6 +1,7 @@
 package server;
 
 import java.util.ArrayList;
+import java.util.Locale;
 import java.util.Scanner;
 
 /*
@@ -13,6 +14,8 @@ public class ServerManager {
 
     //Flag for the loop.
     private boolean isRunning = true;
+
+    //Scanner for user input
     private Scanner scanner = new Scanner(System.in);
 
     //Standard constructor - defaults to true (loadDefaults)
@@ -76,6 +79,7 @@ public class ServerManager {
                     monitorServers();
                     break;
                 case 8:
+                    removeServer();
                     break;
                 case 9:
                     System.out.println("Exiting program. Goodbye!");
@@ -83,6 +87,25 @@ public class ServerManager {
                     break;
             }
         }
+    }
+
+    private void removeServer() {
+        System.out.println("\n--- REMOVE SERVER ---");
+
+        ArrayList<Server> selectedServers = selectAllOrOne("Remove");
+
+        if (selectedServers != null) {
+            System.out.println("Are you sure you want to remove:");
+            for (Server server : selectedServers) {
+                System.out.println("\t- " + server.getServerType() + " (" + server.getIpAddress() + ":" + server.getPort() + ")");
+            }
+
+            if (getConfirmation("Confirm deletion?")) {
+                servers.removeAll(selectedServers);
+                System.out.println("Server(s) removed successfully.");
+            }
+        }
+        promptEnterKey();
     }
 
     private void pingServer() {
@@ -247,6 +270,23 @@ public class ServerManager {
                 }
             } catch (NumberFormatException e) {
                 System.out.println("Invalid input. Please enter a valid number.");
+            }
+        }
+    }
+
+    //Prompts the user for a yes/no confirmation and loops until a valid input is received.
+    private boolean getConfirmation(String promptMessage) {
+        while (true) {
+            System.out.print(promptMessage + " (y/n): ");
+            String input = scanner.nextLine().trim().toLowerCase();
+
+            if (input.equals("y") || input.equals("yes")) {
+                return true;
+            } else if (input.equals("n") || input.equals("no")) {
+                System.out.println("Operation cancelled.");
+                return false;
+            } else {
+                System.out.println("Invalid input. Please enter 'y' for yes or 'n' for no.");
             }
         }
     }
