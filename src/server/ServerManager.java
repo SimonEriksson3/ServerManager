@@ -145,9 +145,10 @@ public class ServerManager {
         System.out.println("\t1. Backup server");
         System.out.println("\t2. Database server");
         System.out.println("\t3. Email server");
+        System.out.println("\t4. Generic server");
 
         //Get server type.
-        int choice = getUserChoice("Enter your choice (1-3): ", 1, 3, true);
+        int choice = getUserChoice("Enter your choice (1-4): ", 1, 4, true);
 
         //If canceled.
         if (choice == 0) {
@@ -181,6 +182,10 @@ public class ServerManager {
             case 3:
                 servers.add(new EmailServer(ip, port, false));
                 System.out.println("Email server added successfully!");
+                break;
+            case 4:
+                servers.add(new GenericServer(ip, port, false));
+                System.out.println("Generic server added successfully!");
                 break;
         }
         promptEnterKey();
@@ -236,6 +241,7 @@ public class ServerManager {
                     System.out.println();
                     m.monitor();
                 } else {
+                    System.out.println();
                     System.out.println(server.getServerType() + " (" + server.getIpAddress() + ") is not monitorable.");
                 }
             }
