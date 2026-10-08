@@ -11,6 +11,16 @@ public abstract class Server {
     private boolean isRunning;
 
     public Server(String ipAddress, int port, boolean isRunning) {
+        //Throw exception if IP is invalid
+        if (ipAddress == null || !isValidIpv4(ipAddress)) {
+            throw new IllegalArgumentException("Invalid IP-address format: " + ipAddress);
+        }
+
+        //Throw exception if port is invalid
+        if (port < 1 || port > 65535) {
+            throw new IllegalArgumentException("Invalid port: " + port + ". Port must be between 1 and 65535.");
+        }
+
         this.ipAddress = ipAddress;
         this.port = port;
         this.isRunning = isRunning;
@@ -32,18 +42,6 @@ public abstract class Server {
     public void setServerStatus(boolean isRunning) {
         this.isRunning = isRunning;
         System.out.println(getServerType() + " (" + getIpAddress() + ") is now " + (getIsRunning() ? "ONLINE" : "OFFLINE"));
-    }
-
-    //Simulates pinging the address to check if there's a currently working connection.
-    public void pingAddress() {
-        System.out.println("Checking connection...");
-        System.out.println("Pinging " + getIpAddress());
-
-        if (getIsRunning()) {
-            System.out.println("Received response from server.");
-        } else {
-            System.out.println("No response received from server.");
-        }
     }
 
     //Returns the server type as a string.

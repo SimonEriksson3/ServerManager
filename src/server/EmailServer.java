@@ -14,11 +14,11 @@ public class EmailServer extends Server implements Monitorable{
     //Random used to simulate a random amount of queued emails.
     private Random rand = new Random();
 
-    public EmailServer(String ipAddress, int port, boolean getIsRunning) {
-        super(ipAddress, port, getIsRunning);
+    public EmailServer(String ipAddress, int port, boolean isRunning) {
+        super(ipAddress, port, isRunning);
 
         //Sets a random amount of simulated queued emails.
-        queuedEmails = rand.nextInt(1, 390);
+        queuedEmails = rand.nextInt(1, maxQueuedEmails + 1);
     }
 
     public int getQueuedEmails() {

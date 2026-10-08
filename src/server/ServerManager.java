@@ -1,7 +1,6 @@
 package server;
 
 import java.util.ArrayList;
-import java.util.Locale;
 import java.util.Scanner;
 
 /*
@@ -27,10 +26,10 @@ public class ServerManager {
     public ServerManager(boolean loadDefaults) {
         if (loadDefaults) {
             //Adding a few servers to our list
-            servers.add(new EmailServer("192.168.1.50", 25, true));
-            servers.add(new DatabaseServer("10.0.0.15", 3306, true, 200));
-            servers.add(new BackupServer("192.168.100.5", 22, false));
-            servers.add(new EmailServer("192.168.1.51", 587, true));
+            registerServer(new EmailServer("192.168.1.50", 25, true));
+            registerServer(new DatabaseServer("10.0.0.15", 3306, true, 200));
+            registerServer(new BackupServer("192.168.100.5", 22, false));
+            registerServer(new EmailServer("192.168.1.51", 587, true));
         }
         System.out.println("ServerManager initialized with " + servers.size() + " servers.");
     }
@@ -43,13 +42,13 @@ public class ServerManager {
             System.out.println("========================================");
             System.out.println("       SERVER MANAGEMENT SYSTEM");
             System.out.println("========================================");
-            System.out.println("\t1. List current servers");
+            System.out.println("\t1. List all servers");
             System.out.println("\t2. Add a new server");
-            System.out.println("\t3. Ping server");
-            System.out.println("\t4. Start server");
-            System.out.println("\t5. Stop server");
+            System.out.println("\t3. Start server");
+            System.out.println("\t4. Stop server");
+            System.out.println("\t5. Ping server");
             System.out.println("\t6. Check server health");
-            System.out.println("\t7. Monitor server(s)");
+            System.out.println("\t7. Monitor server");
             System.out.println("\t8. Remove server");
             System.out.println("\t9. Exit");
             System.out.println("----------------------------------------");
@@ -64,13 +63,13 @@ public class ServerManager {
                     addServer();
                     break;
                 case 3:
-                    pingServer();
-                    break;
-                case 4:
                     startServer();
                     break;
-                case 5:
+                case 4:
                     stopServer();
+                    break;
+                case 5:
+                    pingServer();
                     break;
                 case 6:
                     checkHealth();
@@ -125,7 +124,7 @@ public class ServerManager {
     private void checkHealth() {
         System.out.println("\n--- CHECK HEALTH ---");
 
-        ArrayList<Server> selectedServers = selectAllOrOne("Run check health for");
+        ArrayList<Server> selectedServers = selectAllOrOne("Run health-check for");
 
         if (selectedServers != null) {
             for (Server server : selectedServers) {
@@ -161,32 +160,30 @@ public class ServerManager {
         String ip = getValidIpAddress();
         int port = getValidPort();
 
-        if (isServerDuplicate(ip, port)) {
-            System.out.println("Error: A server with the address " + ip + ":" + port + " is already registered in the system.");
-            promptEnterKey();
-            return;
-        }
-
-        //Create the specific server object based on user input.
-        switch (choice) {
-            case 1:
-                servers.add(new BackupServer(ip, port, false));
-                System.out.println("Backup server added successfully!");
-                break;
-            case 2:
-                //Prompt the user for maxConnections (unique for DatabaseServer).
-                int maxConnections = getUserChoice("Enter maximum number of connections (10-10000): ", 10, 10000);
-                servers.add(new DatabaseServer(ip, port, false, maxConnections));
-                System.out.println("Database server added successfully!");
-                break;
-            case 3:
-                servers.add(new EmailServer(ip, port, false));
-                System.out.println("Email server added successfully!");
-                break;
-            case 4:
-                servers.add(new GenericServer(ip, port, false));
-                System.out.println("Generic server added successfully!");
-                break;
+        try {
+            //Create the specific server object based on user input.
+            switch (choice) {
+                case 1:
+                    registerServer(new BackupServer(ip, port, false));
+                    System.out.println("Backup server added successfully!");
+                    break;
+                case 2:
+                    //Prompt the user for maxConnections (unique for DatabaseServer).
+                    int maxConnections = getUserChoice("Enter maximum number of connections (10-10000): ", 10, 10000);
+                    registerServer(new DatabaseServer(ip, port, false, maxConnections));
+                    System.out.println("Database server added successfully!");
+                    break;
+                case 3:
+                    registerServer(new EmailServer(ip, port, false));
+                    System.out.println("Email server added successfully!");
+                    break;
+                case 4:
+                    registerServer(new GenericServer(ip, port, false));
+                    System.out.println("Generic server added successfully!");
+                    break;
+            }
+        } catch (IllegalArgumentException e) {
+            System.out.println("Error: " + e.getMessage());
         }
         promptEnterKey();
     }
@@ -261,6 +258,9 @@ public class ServerManager {
      * If allowCancel is true the user can also enter 0 to cancel the operation.
      */
     private int getUserChoice(String prompt, int min, int max, boolean allowCancel) {
+
+        if (min > max) throw new IllegalArgumentException("Min value (" + min + ") cannot be greater than max value (" + max + "). ");
+
         while (true) {
             System.out.print(prompt);
 
@@ -377,6 +377,16 @@ public class ServerManager {
             return null;
         }
         return servers.get(choice - 1);
+    }
+
+    //Checks for duplicates and registers a new server to the collection.
+    private void registerServer(Server server) {
+        if (isServerDuplicate(server.getIpAddress(), server.getPort())) {
+            throw new IllegalArgumentException("A server with the address: "
+                    + server.getIpAddress() + ":" + server.getPort()
+                    + " is already registered in the system.");
+        }
+        servers.add(server);
     }
 
     /*

@@ -19,6 +19,9 @@ public class DatabaseServer extends Server implements Monitorable {
 
     public DatabaseServer(String ipAddress, int port, boolean getIsRunning, int maxConnections) {
         super(ipAddress, port, getIsRunning);
+
+        if (maxConnections < 1) throw new IllegalArgumentException("Max connections cannot be less than 1.");
+
         this.maxConnections = maxConnections;
         //Sets a random amount of current simulated connections.
         this.currentConnections = rand.nextInt(1, maxConnections + 1);
