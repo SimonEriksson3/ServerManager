@@ -39,8 +39,12 @@ public abstract class Server {
     }
 
     //This method sets the status of the server, whether it should run or not.
-    public void setServerStatus(boolean isRunning) {
-        this.isRunning = isRunning;
+    public void setServerStatus(boolean newStatus) {
+        if (getIsRunning() == newStatus) {
+            System.out.println(getServerType() + " (" + getIpAddress() + ") is already " + (newStatus ? "running." : "stopped."));
+            return;
+        }
+        this.isRunning = newStatus;
         System.out.println(getServerType() + " (" + getIpAddress() + ") is now " + (getIsRunning() ? "ONLINE" : "OFFLINE"));
     }
 
@@ -91,6 +95,7 @@ public abstract class Server {
                 }
 
                 int value = Integer.parseInt(part);
+
                 if (value < 0 || value > 255) {
                     return false;
                 }

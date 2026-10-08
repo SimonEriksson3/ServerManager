@@ -63,10 +63,10 @@ public class ServerManager {
                     addServer();
                     break;
                 case 3:
-                    startServer();
+                    changeServerStatus(true);
                     break;
                 case 4:
-                    stopServer();
+                    changeServerStatus(false);
                     break;
                 case 5:
                     pingServer();
@@ -188,40 +188,18 @@ public class ServerManager {
         promptEnterKey();
     }
 
-    private void startServer() {
-        System.out.println("\n--- START SERVERS ---");
+    private void changeServerStatus(boolean shouldRun) {
+        System.out.println("\n--- " + (shouldRun ? "START" : "STOP") + " SERVERS ---");
 
-        ArrayList<Server> selectedServers = selectAllOrOne("Start");
+        ArrayList<Server> selectedServers = selectAllOrOne(shouldRun ? "Start" : "Stop");
 
         if (selectedServers != null) {
             for (Server server : selectedServers) {
-                if (server.getIsRunning()) {
-                    System.out.println(server.getServerType() + " (" + server.getIpAddress() + ") is already running.");
-                } else {
-                    server.setServerStatus(true);
-                }
+                server.setServerStatus(shouldRun);
             }
         }
         promptEnterKey();
     }
-
-    private void stopServer() {
-        System.out.println("\n--- STOP SERVERS ---");
-
-        ArrayList<Server> selectedServers = selectAllOrOne("Stop");
-
-        if (selectedServers != null) {
-            for (Server server : selectedServers) {
-                if (!server.getIsRunning()) {
-                    System.out.println(server.getServerType() + " (" + server.getIpAddress() + ") is already stopped.");
-                } else {
-                    server.setServerStatus(false);
-                }
-            }
-        }
-        promptEnterKey();
-    }
-
 
     /*
      * Allows the user to monitor all the servers or a specific server chosen from a list.
@@ -259,7 +237,8 @@ public class ServerManager {
      */
     private int getUserChoice(String prompt, int min, int max, boolean allowCancel) {
 
-        if (min > max) throw new IllegalArgumentException("Min value (" + min + ") cannot be greater than max value (" + max + "). ");
+        if (min > max)
+            throw new IllegalArgumentException("Min value (" + min + ") cannot be greater than max value (" + max + "). ");
 
         while (true) {
             System.out.print(prompt);
@@ -343,9 +322,18 @@ public class ServerManager {
         if (servers.isEmpty()) {
             System.out.println("There are currently no servers available.");
         } else {
+            int onlineCount = 0;
+
+            System.out.println("\n--- REGISTERED SERVERS ---");
+
             for (Server server : servers) {
-                System.out.println(server.getServerType() + ": " + server.getIpAddress() + ":" + server.getPort());
+                System.out.println(server.getServerType() + ": " + server.getIpAddress() + ":" + server.getPort()
+                        + " [" + (server.getIsRunning() ? "ONLINE" : "OFFLINE") + "]");
+                if (server.getIsRunning()) onlineCount++;
             }
+            System.out.println("----------------------------------------");
+            System.out.println("Total: " + servers.size() + " | Online: " + onlineCount + " | Offline: " + (servers.size() - onlineCount));
+
         }
         promptEnterKey();
     }

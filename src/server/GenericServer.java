@@ -1,10 +1,6 @@
 package server;
 
-import java.util.Random;
-
 public class GenericServer extends Server{
-
-    private Random rand = new Random();
 
     public GenericServer(String ipAddress, int port, boolean isRunning) {
         super(ipAddress, port, isRunning);
