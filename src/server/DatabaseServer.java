@@ -20,9 +20,7 @@ public class DatabaseServer extends Server implements Monitorable {
     public DatabaseServer(String ipAddress, int port, boolean getIsRunning, int maxConnections) {
         super(ipAddress, port, getIsRunning);
 
-        if (maxConnections < 1) throw new IllegalArgumentException("Max connections cannot be less than 1.");
-
-        this.maxConnections = maxConnections;
+        setMaxConnections(maxConnections);
         //Sets a random amount of current simulated connections.
         this.currentConnections = rand.nextInt(1, maxConnections + 1);
     }
@@ -35,10 +33,27 @@ public class DatabaseServer extends Server implements Monitorable {
         return maxConnections;
     }
 
+    public void setMaxConnections(int maxConnections) {
+        if (maxConnections < 1) {
+            throw new IllegalArgumentException("Max connections cannot be less than 1.");
+        }
+
+        if (this.currentConnections > maxConnections) {
+            throw new IllegalStateException("Cannot reduce max connections below the current number of connections (" + getCurrentConnections() + ").");
+        }
+        this.maxConnections = maxConnections;
+    }
+
     //Returns the server type as string.
     @Override
     public String getServerType() {
         return "Database server";
+    }
+
+    @Override
+    public String getCreationSummary() {
+        return super.getCreationSummary()
+                + "\nMax connections: " + getMaxConnections();
     }
 
     //Overrides the checkHealth() method from the superclass.
@@ -66,7 +81,7 @@ public class DatabaseServer extends Server implements Monitorable {
     //Prints server telemetry.
     @Override
     public void monitor() {
-        double loadPercentage = ((double)currentConnections / maxConnections) * 100;
+        double loadPercentage = ((double) currentConnections / maxConnections) * 100;
         int availableConnections = getMaxConnections() - getCurrentConnections();
 
         //Organized for readability.

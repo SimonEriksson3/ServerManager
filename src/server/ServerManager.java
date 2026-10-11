@@ -1,5 +1,6 @@
 package server;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Scanner;
 
@@ -39,6 +40,7 @@ public class ServerManager {
      */
     public void run() {
         while (isRunning) {
+            clearConsole();
             System.out.println("========================================");
             System.out.println("       SERVER MANAGEMENT SYSTEM");
             System.out.println("========================================");
@@ -55,6 +57,7 @@ public class ServerManager {
 
             int choice = getUserChoice("Enter your choice (1-9): ", 1, 9);
 
+            clearConsole();
             switch (choice) {
                 case 1:
                     displayAllServers();
@@ -99,9 +102,12 @@ public class ServerManager {
                 System.out.println("\t- " + server.getServerType() + " (" + server.getIpAddress() + ":" + server.getPort() + ")");
             }
 
+            int count = selectedServers.size();
+            String serverLabel = count == 1 ? "server" : "servers";
+
             if (getConfirmation("Confirm deletion?")) {
                 servers.removeAll(selectedServers);
-                System.out.println("Server(s) removed successfully.");
+                System.out.println(count + " " + serverLabel + " removed successfully.");
             }
         }
         promptEnterKey();
@@ -124,7 +130,7 @@ public class ServerManager {
     private void checkHealth() {
         System.out.println("\n--- CHECK HEALTH ---");
 
-        ArrayList<Server> selectedServers = selectAllOrOne("Run health-check for");
+        ArrayList<Server> selectedServers = selectAllOrOne("Run health check on");
 
         if (selectedServers != null) {
             for (Server server : selectedServers) {
@@ -147,7 +153,7 @@ public class ServerManager {
         System.out.println("\t4. Generic server");
 
         //Get server type.
-        int choice = getUserChoice("Enter your choice (1-4): ", 1, 4, true);
+        int choice = getUserChoice("Enter your choice (1-4 or 0 to cancel): ", 1, 4, true);
 
         //If canceled.
         if (choice == 0) {
@@ -159,43 +165,60 @@ public class ServerManager {
         //Get the data that all servers share.
         String ip = getValidIpAddress();
         int port = getValidPort();
+        Server server;
 
         try {
             //Create the specific server object based on user input.
             switch (choice) {
                 case 1:
-                    registerServer(new BackupServer(ip, port, false));
-                    System.out.println("Backup server added successfully!");
+                    server = new BackupServer(ip, port, false);
                     break;
                 case 2:
                     //Prompt the user for maxConnections (unique for DatabaseServer).
                     int maxConnections = getUserChoice("Enter maximum number of connections (10-10000): ", 10, 10000);
-                    registerServer(new DatabaseServer(ip, port, false, maxConnections));
-                    System.out.println("Database server added successfully!");
+                    server = new DatabaseServer(ip, port, false, maxConnections);
                     break;
                 case 3:
-                    registerServer(new EmailServer(ip, port, false));
-                    System.out.println("Email server added successfully!");
+                    server = new EmailServer(ip, port, false);
                     break;
                 case 4:
-                    registerServer(new GenericServer(ip, port, false));
-                    System.out.println("Generic server added successfully!");
+                    server = new GenericServer(ip, port, false);
                     break;
+                default:
+                    throw new IllegalArgumentException("Invalid server choice.");
             }
+
+            System.out.println("\nThe following server will be added: \n" + server.getCreationSummary());
+
+            if (getConfirmation("Add this server?")) {
+                registerServer(server);
+                System.out.println(server.getServerType() + " added successfully!");
+            }
+
         } catch (IllegalArgumentException e) {
-            System.out.println("Error: " + e.getMessage());
+            System.out.println("\nError: " + e.getMessage());
         }
         promptEnterKey();
     }
 
     private void changeServerStatus(boolean shouldRun) {
-        System.out.println("\n--- " + (shouldRun ? "START" : "STOP") + " SERVERS ---");
+        String action = shouldRun ? "Start" : "Stop";
 
-        ArrayList<Server> selectedServers = selectAllOrOne(shouldRun ? "Start" : "Stop");
+        System.out.println("\n--- " + action.toUpperCase() + " SERVERS ---");
+
+        ArrayList<Server> selectedServers = selectAllOrOne(action);
 
         if (selectedServers != null) {
-            for (Server server : selectedServers) {
-                server.setServerStatus(shouldRun);
+            int count = selectedServers.size();
+            String serverLabel = count == 1 ? "server" : "servers";
+
+            System.out.println("\nYou have selected " + count + " " + serverLabel + ".\n");
+            String confirmationMessage = "Are you sure you want to " + action.toLowerCase() + " the selected " + serverLabel + "?";
+
+            if (getConfirmation(confirmationMessage)) {
+                for (Server server : selectedServers) {
+                    server.setServerStatus(shouldRun);
+                }
             }
         }
         promptEnterKey();
@@ -237,8 +260,9 @@ public class ServerManager {
      */
     private int getUserChoice(String prompt, int min, int max, boolean allowCancel) {
 
-        if (min > max)
+        if (min > max) {
             throw new IllegalArgumentException("Min value (" + min + ") cannot be greater than max value (" + max + "). ");
+        }
 
         while (true) {
             System.out.print(prompt);
@@ -329,7 +353,9 @@ public class ServerManager {
             for (Server server : servers) {
                 System.out.println(server.getServerType() + ": " + server.getIpAddress() + ":" + server.getPort()
                         + " [" + (server.getIsRunning() ? "ONLINE" : "OFFLINE") + "]");
-                if (server.getIsRunning()) onlineCount++;
+                if (server.getIsRunning()) {
+                    onlineCount++;
+                }
             }
             System.out.println("----------------------------------------");
             System.out.println("Total: " + servers.size() + " | Online: " + onlineCount + " | Offline: " + (servers.size() - onlineCount));
@@ -402,7 +428,7 @@ public class ServerManager {
 
         switch (choice) {
             case 1:
-                Server s = selectServer("Enter the specific server you want to " + action.toLowerCase() + ": ");
+                Server s = selectServer("Enter the specific server you want to " + action.toLowerCase() + " (or 0 to cancel): ");
                 //If selectServer is canceled = return null.
                 if (s == null) {
                     return null;
@@ -416,5 +442,21 @@ public class ServerManager {
         }
 
         return selectedServers;
+    }
+
+    /*
+     * Clears the command prompt from text (not in any IDE).
+     * Not my code. Comes from here:
+     * https://www.baeldung.com/java-clear-console-screen
+     */
+    private void clearConsole() {
+        try {
+            new ProcessBuilder("cmd", "/c", "cls")
+                    .inheritIO()
+                    .start()
+                    .waitFor();
+        } catch (IOException | InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 }

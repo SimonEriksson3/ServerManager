@@ -38,6 +38,13 @@ public abstract class Server {
         return isRunning;
     }
 
+    //Returns the relevant information shown during the addServer-process.
+    public String getCreationSummary() {
+        return "Type: " + getServerType()
+                + "\nIP address: " + getIpAddress()
+                + "\nPort: " + getPort();
+    }
+
     //This method sets the status of the server, whether it should run or not.
     public void setServerStatus(boolean newStatus) {
         if (getIsRunning() == newStatus) {
@@ -45,7 +52,7 @@ public abstract class Server {
             return;
         }
         this.isRunning = newStatus;
-        System.out.println(getServerType() + " (" + getIpAddress() + ") is now " + (getIsRunning() ? "ONLINE" : "OFFLINE"));
+        System.out.println(getServerType() + " (" + getIpAddress() + ") is now " + (getIsRunning() ? "ONLINE." : "OFFLINE."));
     }
 
     //Returns the server type as a string.
@@ -74,6 +81,7 @@ public abstract class Server {
         try {
             Thread.sleep(500);
         } catch (InterruptedException e) {
+            System.out.println(e.getMessage());
         }
     }
 
@@ -81,6 +89,10 @@ public abstract class Server {
      * Checks if a string corresponds to a valid IP-address.
      */
     public static boolean isValidIpv4(String ip) {
+        if (ip == null) {
+            return false;
+        }
+
         String[] parts = ip.split("\\."); //Split into 4 parts
 
         if (parts.length != 4) {
@@ -91,6 +103,11 @@ public abstract class Server {
             for (String part : parts) {
                 //Prevents leading zeros to avoid invalid formatting.
                 if (part.length() > 1 && part.startsWith("0")) {
+                    return false;
+                }
+
+                //Rejects anything other than numbers
+                if (!part.matches("[0-9]+")){
                     return false;
                 }
 
