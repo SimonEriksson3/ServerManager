@@ -38,6 +38,9 @@ public abstract class Server {
         return isRunning;
     }
 
+    //Returns the server type as a string.
+    public abstract String getServerType();
+
     //Returns the relevant information shown during the addServer-process.
     public String getCreationSummary() {
         return "Type: " + getServerType()
@@ -54,9 +57,6 @@ public abstract class Server {
         this.isRunning = newStatus;
         System.out.println(getServerType() + " (" + getIpAddress() + ") is now " + (getIsRunning() ? "ONLINE." : "OFFLINE."));
     }
-
-    //Returns the server type as a string.
-    public abstract String getServerType();
 
     //Simulates if the server is healthy.
     public void checkHealth() {
