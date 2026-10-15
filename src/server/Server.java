@@ -1,19 +1,26 @@
 package server;
 
-/*
- * Server - the superclass.
+/**
+ * The abstract base class for all servers in the system.
+ * Holds common properties such as IP address, port and status for all server types.
  */
-
 public abstract class Server {
 
     private String ipAddress;
     private int port;
     private boolean isRunning;
 
+    /**
+     * Constructs a new Server with specified network endpoint and status.
+     *
+     * @param ipAddress the IP address of the server.
+     * @param port the port number of the server.
+     * @param isRunning true if the server is online, false otherwise.
+     */
     public Server(String ipAddress, int port, boolean isRunning) {
         //Throw exception if IP is invalid
-        if (ipAddress == null || !isValidIpv4(ipAddress)) {
-            throw new IllegalArgumentException("Invalid IP-address format: " + ipAddress);
+        if (!isValidIpv4(ipAddress)) {
+            throw new IllegalArgumentException("Invalid IP address format: " + ipAddress);
         }
 
         //Throw exception if port is invalid
@@ -38,34 +45,49 @@ public abstract class Server {
         return isRunning;
     }
 
-    //Returns the server type as a string.
+    public String getEndpoint() {
+        return getIpAddress() + ":" + getPort();
+    }
+
     public abstract String getServerType();
 
-    //Returns the relevant information shown during the addServer-process.
+    /**
+     * Returns the relevant information shown during the add server process
+     */
     public String getCreationSummary() {
         return "Type: " + getServerType()
                 + "\nIP address: " + getIpAddress()
                 + "\nPort: " + getPort();
     }
 
-    //This method sets the status of the server, whether it should run or not.
+    /**
+     * This method sets the status of the server, whether it should run or not.
+     * @param newStatus true to start the server, false to stop.
+     */
     public void setServerStatus(boolean newStatus) {
         if (getIsRunning() == newStatus) {
             System.out.println(getServerType() + " (" + getIpAddress() + ") is already " + (newStatus ? "running." : "stopped."));
             return;
         }
+
         this.isRunning = newStatus;
         System.out.println(getServerType() + " (" + getIpAddress() + ") is now " + (getIsRunning() ? "ONLINE." : "OFFLINE."));
     }
 
-    //Simulates if the server is healthy.
+
+    /**
+     * Simulates if the server is healthy.
+     */
     public void checkHealth() {
-        System.out.println("Running health diagnostic for " + getIpAddress() + " on port " + getPort() + ".");
+        System.out.println("Running health diagnostic for " + getServerType() + " " + getIpAddress() + " on port " + getPort() + ".");
     }
 
-    //Simulates pinging the server.
+    /**
+     * Simulates pinging the server.
+     */
     public void ping() {
         System.out.println("Pinging " + getServerType() + " at " + getIpAddress() + "...");
+
         sleep();
 
         if (!getIsRunning()) {
@@ -85,8 +107,10 @@ public abstract class Server {
         }
     }
 
-    /*
+    /**
      * Checks if a string corresponds to a valid IP-address.
+     * @param ip the string to check.
+     * @return true if the string is a valid IPv4 address, false otherwise.
      */
     public static boolean isValidIpv4(String ip) {
         if (ip == null) {

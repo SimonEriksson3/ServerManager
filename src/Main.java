@@ -1,4 +1,3 @@
-import server.EmailServer;
 import server.ServerManager;
 
 public class Main {

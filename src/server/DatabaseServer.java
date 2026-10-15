@@ -2,7 +2,7 @@ package server;
 
 import java.util.Random;
 
-/*
+/**
  * Represents a database server, handling database-specific monitoring like active connections.
  */
 public class DatabaseServer extends Server implements Monitorable {
@@ -17,6 +17,14 @@ public class DatabaseServer extends Server implements Monitorable {
     //Random used to simulate a number of current connections.
     private Random rand = new Random();
 
+    /**
+     * Constructs a new DatabaseServer and initializes random active connection telemetry.
+     *
+     * @param ipAddress the IP address of the server.
+     * @param port the port number of the server.
+     * @param getIsRunning true if the server should start online, false otherwise.
+     * @param maxConnections the maximum number of concurrent database connections allowed.
+     */
     public DatabaseServer(String ipAddress, int port, boolean getIsRunning, int maxConnections) {
         super(ipAddress, port, getIsRunning);
 
@@ -41,10 +49,10 @@ public class DatabaseServer extends Server implements Monitorable {
         if (this.currentConnections > maxConnections) {
             throw new IllegalStateException("Cannot reduce max connections below the current number of connections (" + getCurrentConnections() + ").");
         }
+
         this.maxConnections = maxConnections;
     }
 
-    //Returns the server type as string.
     @Override
     public String getServerType() {
         return "Database server";
@@ -56,8 +64,10 @@ public class DatabaseServer extends Server implements Monitorable {
                 + "\nMax connections: " + getMaxConnections();
     }
 
-    //Overrides the checkHealth() method from the superclass.
-    //This version of the method will also check how many additional connections the database-server can handle.
+    /**
+     * Overrides the checkHealth() method from the superclass.
+     * This version of the method will also check how many additional connections the database-server can handle.
+     */
     @Override
     public void checkHealth() {
         super.checkHealth();
@@ -67,8 +77,9 @@ public class DatabaseServer extends Server implements Monitorable {
             return;
         }
 
-        //Checks if connection pool is reaching its limit.
         int availableConnections = getMaxConnections() - getCurrentConnections();
+
+        //Checks if connection pool is reaching its limit.
         if (availableConnections == 0) {
             System.out.println("CRITICAL: Connection pool exhausted! Max connections reached.");
         } else if (availableConnections <= 10) {
@@ -78,7 +89,9 @@ public class DatabaseServer extends Server implements Monitorable {
         }
     }
 
-    //Prints server telemetry.
+    /**
+     * Prints server telemetry including number of connections and maximum number of connections.
+     */
     @Override
     public void monitor() {
         double loadPercentage = ((double) currentConnections / maxConnections) * 100;

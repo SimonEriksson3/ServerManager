@@ -4,8 +4,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Scanner;
 
-/*
- * Handles the menu, user input and validations.
+/**
+ * Handles the menus, user input and validations.
  */
 public class UserInterface {
 
@@ -20,12 +20,10 @@ public class UserInterface {
         this.manager = manager;
     }
 
-    /*
-     * Starts the main loop, allowing the user to interact with the menu.
+    /**
+     * Starts the main loop, allowing the user to interact with the main menu.
      */
     public void run() {
-        System.out.println("Initialized with " + manager.getServerCount() + " servers.");
-
         while (isRunning) {
             clearConsole();
             System.out.println("========================================");
@@ -64,20 +62,23 @@ public class UserInterface {
         }
     }
 
-    //Used only for displaying all servers.
+    /**
+     * Displays all registered servers without indexes.
+     * Only meant to be used for viewing the list of servers, not for selecting servers.
+     */
     private void displayAllServers() {
         if (manager.isEmpty()) {
             System.out.println("There are currently no servers available.");
         } else {
-
             System.out.println("\n--- REGISTERED SERVERS ---");
 
             for (Server server : manager.getServers()) {
-                System.out.println(server.getServerType() + ": " + server.getIpAddress() + ":" + server.getPort()
+                System.out.println(server.getServerType() + ": " + server.getEndpoint()
                         + " [" + (server.getIsRunning() ? "ONLINE" : "OFFLINE") + "]");
             }
 
             System.out.println("----------------------------------------");
+
             int getServerCount = manager.getServerCount();
             int onlineServersCount = manager.getOnlineServersCount();
             int offlineServersCount = getServerCount - onlineServersCount;
@@ -85,64 +86,24 @@ public class UserInterface {
             System.out.println("Total: " + getServerCount
                     + " | Online: " + onlineServersCount
                     + " | Offline: " + offlineServersCount);
-
         }
     }
 
-    //Used when listing servers with an index for user selection.
+    /**
+     * Used when listing servers with an index for user selection.
+     */
     private void listAllServers() {
         //Lists all the available servers.
         System.out.println("\n--- AVAILABLE SERVERS ---");
 
         for (int i = 0; i < manager.getServerCount(); i++) {
             Server s = manager.get(i);
-            System.out.println("\t" + (i + 1) + ". " + s.getServerType() + " - " + s.getIpAddress() + ":" + s.getPort());
+            System.out.println("\t" + (i + 1) + ". " + s.getServerType() + " - " + s.getEndpoint());
         }
     }
 
-    private void removeServer() {
-        System.out.println("\n--- REMOVE SERVER ---");
-
-        ArrayList<Server> selectedServers = selectAllOrOne("Remove");
-
-        if (selectedServers != null) {
-            System.out.println("Are you sure you want to remove:");
-            for (Server server : selectedServers) {
-                System.out.println("\t- " + server.getServerType() + " (" + server.getIpAddress() + ":" + server.getPort() + ")");
-            }
-
-            int count = selectedServers.size();
-            String serverLabel = count == 1 ? "server" : "servers"; //Checks if the success-message should use the word server in plural or singular.
-
-            if (getConfirmation("Confirm deletion?")) {
-                manager.removeServers(selectedServers);
-                System.out.println(count + " " + serverLabel + " removed successfully.");
-            }
-        }
-    }
-
-    private void pingServer() {
-        System.out.println("\n--- PING SERVER ---");
-
-        ArrayList<Server> selectedServers = selectAllOrOne("Ping");
-
-        if (selectedServers != null) {
-            manager.pingServers(selectedServers);
-        }
-    }
-
-    private void checkHealth() {
-        System.out.println("\n--- CHECK HEALTH ---");
-
-        ArrayList<Server> selectedServers = selectAllOrOne("Run health check on");
-
-        if (selectedServers != null) {
-            manager.serverHealthChecks(selectedServers);
-        }
-    }
-
-    /*
-     * Adds a server to the collection.
+    /**
+     * Adds a new server to the collection.
      */
     private void addServer() {
         System.out.println("\n--- ADD SERVER ---");
@@ -191,6 +152,60 @@ public class UserInterface {
         }
     }
 
+    /**
+     * Handles the server removal, prompting the user to select and confirm sever deletion.
+     */
+    private void removeServer() {
+        System.out.println("\n--- REMOVE SERVER ---");
+
+        ArrayList<Server> selectedServers = selectAllOrOne("Remove");
+
+        if (selectedServers != null) {
+            System.out.println("\nAre you sure you want to remove:");
+            for (Server server : selectedServers) {
+                System.out.println("\t- " + server.getServerType() + " (" + server.getEndpoint() + ")");
+            }
+
+            int count = selectedServers.size();
+            String serverLabel = count == 1 ? "server" : "servers"; //Checks if the success-message should use the word server in plural or singular.
+
+            if (getConfirmation("Confirm deletion?")) {
+                manager.removeServers(selectedServers);
+                System.out.println(count + " " + serverLabel + " removed successfully.");
+            }
+        }
+    }
+
+    /**
+     * Prompts the user to select servers and runs a simulated ping test.
+     */
+    private void pingServer() {
+        System.out.println("\n--- PING SERVER ---");
+
+        ArrayList<Server> selectedServers = selectAllOrOne("Ping");
+
+        if (selectedServers != null) {
+            manager.pingServers(selectedServers);
+        }
+    }
+
+    /**
+     * Prompts the user to select servers and runs a health check on each selected server.
+     */
+    private void checkHealth() {
+        System.out.println("\n--- CHECK HEALTH ---");
+
+        ArrayList<Server> selectedServers = selectAllOrOne("Run health check on");
+
+        if (selectedServers != null) {
+            manager.serverHealthChecks(selectedServers);
+        }
+    }
+
+    /**
+     * Starts or stops the selected servers based on the argument.
+     * @param shouldRun true to start servers, false to stop them.
+     */
     private void changeServerStatus(boolean shouldRun) {
         String action = shouldRun ? "Start" : "Stop";
 
@@ -215,7 +230,7 @@ public class UserInterface {
         }
     }
 
-    /*
+    /**
      * Allows the user to monitor all the servers or a specific server chosen from a list.
      */
     private void monitorServers() {
@@ -228,16 +243,25 @@ public class UserInterface {
         }
     }
 
-    /*
+    /**
      * Overloaded version of getUserChoice that defaults to not allowing cancellation.
+     * @param prompt the prompt that should be displayed for the user before user input.
+     * @param min the first option of the menu.
+     * @param max the last option of the menu.
+     * @return the chosen option, or 0 if the operation was canceled.
      */
     private int getUserChoice(String prompt, int min, int max) {
         return getUserChoice(prompt, min, max, false);
     }
 
-    /*
+    /**
      * Handles user input safely and prompts the user continuously until a valid integer between the specified range is entered.
      * If allowCancel is true the user can also enter 0 to cancel the operation.
+     * @param prompt the prompt that should be displayed for the user before user input.
+     * @param min the first option of the menu.
+     * @param max the last option of the menu.
+     * @param allowCancel if the user should be allowed to cancel and return to the main menu.
+     * @return the chosen option, or 0 if the operation was canceled.
      */
     private int getUserChoice(String prompt, int min, int max, boolean allowCancel) {
 
@@ -255,6 +279,7 @@ public class UserInterface {
                 if (allowCancel && choice == 0) {
                     return 0;
                 }
+
                 if (choice >= min && choice <= max) {
                     return choice;
                 } else {
@@ -270,7 +295,10 @@ public class UserInterface {
         }
     }
 
-    //Prompts the user for a yes/no confirmation and loops until a valid input is received.
+    /**
+     * Prompts the user for a yes/no confirmation and loops until a valid input is received.
+     * @param promptMessage the prompt that should be displayed for the user before user input.
+     */
     private boolean getConfirmation(String promptMessage) {
         while (true) {
             System.out.print(promptMessage + " (y/n): ");
@@ -287,13 +315,18 @@ public class UserInterface {
         }
     }
 
-    //Pauses the program and waits for the user to press enter before continuing.
+    /**
+     * Pauses the program and waits for the user to press enter before continuing.
+     */
     private void promptEnterKey() {
         System.out.println("\nPress \"ENTER\" to return to main menu...");
         scanner.nextLine();
     }
 
-    //Prompts the user for a valid IP-address.
+    /**
+     * Prompts the user for a valid IP-address.
+     * @return the valid IP address entered by the user.
+     */
     private String getValidIpAddress() {
         while (true) {
             System.out.print("Enter IP-address: ");
@@ -307,14 +340,18 @@ public class UserInterface {
         }
     }
 
-    //Prompts the user for a valid server port.
+    /**
+     * Prompts the user for a valid server port.
+     * @return the port entered by the user.
+     */
     private int getValidPort() {
         return getUserChoice("Enter port (1-65535): ", 1, 65535);
     }
 
-    /*
+    /**
      * Lists all available servers and allows the user to select one.
-     * Returns the chosen server object or null if the action is canceled.
+     * @param prompt the prompt message displayed to the user.
+     * @return the chosen server object or null if the action is canceled.
      */
     private Server selectServer(String prompt) {
         if (manager.isEmpty()) {
@@ -324,17 +361,20 @@ public class UserInterface {
 
         listAllServers();
         int choice = getUserChoice(prompt, 1, manager.getServerCount(), true);
+
         if (choice == 0) {
             System.out.println("Selecting server canceled.");
             return null;
         }
+
         return manager.get(choice - 1);
     }
 
-    /*
+    /**
      * Allows the selection of all servers or a specific server.
      * Used to perform a specific action on selected servers.
-     * Returns null if the user cancels the selection.
+     * @param action the action to perform on selected servers ("ping", "remove", "start", "stop" etc.)
+     * @return the chosen servers or null if the user cancels the selection.
      */
     private ArrayList<Server> selectAllOrOne(String action) {
         if (manager.isEmpty()) {
@@ -373,6 +413,7 @@ public class UserInterface {
                 int port = getValidPort();
 
                 Server server = manager.findServer(ip, port);
+
                 if (server != null) {
                     selectedServers.add(server);
                 }
@@ -387,10 +428,10 @@ public class UserInterface {
         return selectedServers;
     }
 
-    /*
+    /**
      * Clears the command prompt from text (not in any IDE).
      * Not my code. Comes from here:
-     * https://www.baeldung.com/java-clear-console-screen
+     * @see <a href="https://www.baeldung.com/java-clear-console-screen">Baeldung: Clear Console Screen</a>
      */
     private void clearConsole() {
         try {

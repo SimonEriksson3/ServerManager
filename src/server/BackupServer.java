@@ -2,7 +2,7 @@ package server;
 
 import java.util.Random;
 
-/*
+/**
  * Represents a backup server, handling backup-specific monitoring like storage capacity and active backup status.
  */
 public class BackupServer extends Server implements Monitorable{
@@ -17,6 +17,7 @@ public class BackupServer extends Server implements Monitorable{
 
     public BackupServer(String ipAddress, int port, boolean getIsRunning) {
         super(ipAddress, port, getIsRunning);
+
         //Assigns random simulated values.
         this.hasActiveBackup = rand.nextBoolean();
 
@@ -46,8 +47,10 @@ public class BackupServer extends Server implements Monitorable{
         return "Backup server";
     }
 
-    //Overrides the checkHealth() method from the superclass.
-    //This version of the method will also check if the backup-server has a working backup.
+    /**
+     * Overrides the checkHealth() method from the superclass.
+     * This version of the method will also check if the backup-server has a working backup.
+     */
     @Override
     public void checkHealth() {
         super.checkHealth();
@@ -64,7 +67,9 @@ public class BackupServer extends Server implements Monitorable{
         }
     }
 
-    //Prints server telemetry.
+    /**
+     * Prints server telemetry including disk usage and status of backup.
+     */
     @Override
     public void monitor() {
         double backupSizeGb = getBackupSize() / 1024; //Converted from MB to GB

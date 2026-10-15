@@ -2,10 +2,10 @@ package server;
 
 import java.util.Random;
 
-/*
+/**
  * Represents an email server that implements specific email telemetry.
  */
-public class EmailServer extends Server implements Monitorable{
+public class EmailServer extends Server implements Monitorable {
 
     //The number of queued emails.
     private int queuedEmails;
@@ -29,14 +29,15 @@ public class EmailServer extends Server implements Monitorable{
         return maxQueuedEmails;
     }
 
-    //Returns the server type as string.
     @Override
     public String getServerType() {
         return "Email server";
     }
 
-    //Overrides the checkHealth() method from the superclass.
-    //This version of the method will also check if email queue is within safe limits.
+    /**
+     * Overrides the checkHealth() method from the superclass.
+     * This version of the method will also check if email queue is within safe limits.
+     */
     @Override
     public void checkHealth() {
         super.checkHealth();
@@ -53,10 +54,12 @@ public class EmailServer extends Server implements Monitorable{
         }
     }
 
-    //Prints server telemetry.
+    /**
+     * Prints server telemetry including number of queued emails and maximum number of queued emails.
+     */
     @Override
     public void monitor() {
-        double queuePercentage = ((double)getQueuedEmails() / maxQueuedEmails) * 100; //Email queue load percentage
+        double queuePercentage = ((double) getQueuedEmails() / maxQueuedEmails) * 100; //Email queue load percentage
 
         //Organized for readability.
         String emailFlushTime = String.format("%.0f", getQueuedEmails() * 1.2);
