@@ -20,14 +20,16 @@ public class GenericServer extends Server{
      * This version of the method only checks if the server is running or not.
      */
     @Override
-    public void checkHealth() {
-        super.checkHealth();
+    public String checkHealth() {
+        StringBuilder sb = new StringBuilder();
+
+        sb.append(super.checkHealth() + "\n");
 
         if (!getIsRunning()) {
-            System.out.println("Status: Server is currently offline.");
-            return;
+            sb.append("Status: Server is currently offline.");
+        } else {
+            sb.append("HEALTH OK: Server is running normally.");
         }
-
-        System.out.println("HEALTH OK: Server is running normally.");
+        return sb.toString();
     }
 }

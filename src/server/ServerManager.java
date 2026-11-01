@@ -1,5 +1,6 @@
 package server;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -99,60 +100,56 @@ public class ServerManager {
      * Starts the selected servers.
      * @param selectedServers the selected servers that should start.
      */
-    public void startServers(ArrayList<Server> selectedServers) {
+    public ArrayList<String> startServers(ArrayList<Server> selectedServers) {
+        ArrayList<String> results = new ArrayList<String>();
+
         for (Server server : selectedServers) {
-            server.setServerStatus(true);
+            results.add(server.setServerStatus(true));
         }
+        return results;
     }
 
     /**
      * Stops the selected servers
      * @param selectedServers the selected servers that should be stopped.
      */
-    public void stopServers(ArrayList<Server> selectedServers) {
+    public ArrayList<String> stopServers(ArrayList<Server> selectedServers) {
+        ArrayList<String> results = new ArrayList<String>();
+
         for (Server server : selectedServers) {
-            server.setServerStatus(false);
+            results.add(server.setServerStatus(false));
         }
+        return results;
     }
 
     /**
-     * Prints telemetry of the selected servers.
+     * Returns telemetry data of the selected servers.
      * @param selectedServers the selected servers to get telemetric data from.
      */
-    public void monitorServers(ArrayList<Server> selectedServers) {
+    public ArrayList<String> getMonitoringData(ArrayList<Server> selectedServers) {
+        ArrayList<String> results = new ArrayList<String>();
+
         for (Server server : selectedServers) {
             //Checks if the server implements the Monitorable interface and executes its monitor implementation.
             if (server instanceof Monitorable m) {
-                System.out.println(); //Empty line
-                m.monitor();
+                results.add(m.monitor());
             } else {
-                System.out.println();
-                System.out.println(server.getServerType() + " (" + server.getEndpoint() + ") is not monitorable.");
+                results.add(server.getServerType() + " (" + server.getEndpoint() + ") is not monitorable.");
             }
         }
+        return results;
     }
 
     /**
      * Performs simulated health checks from selected servers.
      * @param selectedServers the selected servers to run simulated health checks on.
      */
-    public void serverHealthChecks(ArrayList<Server> selectedServers) {
+    public ArrayList<String> getHealthData(ArrayList<Server> selectedServers) {
+        ArrayList<String> results = new ArrayList<String>();
         for (Server server : selectedServers) {
-            System.out.println();
-            server.checkHealth();
+            results.add(server.checkHealth());
         }
-    }
-
-    /**
-     * Runs a simulated ping test.
-     *
-     * @param selectedServers the selected servers to run simulated ping tests on.
-     */
-    public void pingServers(ArrayList<Server> selectedServers) {
-        for (Server server : selectedServers) {
-            System.out.println();
-            server.ping();
-        }
+        return results;
     }
 
     /**

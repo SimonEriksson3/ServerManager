@@ -7,7 +7,7 @@ package server;
 public interface Monitorable {
 
     /**
-     * Prints telemetric data specific to the implementing server type.
+     * Returns telemetric data specific to the implementing server type.
      */
-    void monitor();
+    String monitor();
 }

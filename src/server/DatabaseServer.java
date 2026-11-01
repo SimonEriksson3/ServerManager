@@ -69,31 +69,32 @@ public class DatabaseServer extends Server implements Monitorable {
      * This version of the method will also check how many additional connections the database-server can handle.
      */
     @Override
-    public void checkHealth() {
-        super.checkHealth();
+    public String checkHealth() {
+        StringBuilder sb = new StringBuilder();
 
-        if (!getIsRunning()) {
-            System.out.println("CRITICAL: Database server is unreachable!");
-            return;
-        }
+        sb.append(super.checkHealth() + "\n");
 
         int availableConnections = getMaxConnections() - getCurrentConnections();
 
-        //Checks if connection pool is reaching its limit.
-        if (availableConnections == 0) {
-            System.out.println("CRITICAL: Connection pool exhausted! Max connections reached.");
+        if (!getIsRunning()) {
+            sb.append("CRITICAL: Database server is unreachable!");
+        } else if (availableConnections == 0) {
+            //Checks if connection pool is reaching its limit.
+            sb.append("CRITICAL: Connection pool exhausted! Max connections reached.");
         } else if (availableConnections <= 10) {
-            System.out.println("WARNING: Low connection headroom (" + availableConnections + " slots available).");
+            sb.append("WARNING: Low connection headroom (" + availableConnections + " slots available).");
         } else {
-            System.out.println("HEALTH OK: Connection pool is healthy (" + availableConnections + " slots available).");
+            sb.append("HEALTH OK: Connection pool is healthy (" + availableConnections + " slots available).");
         }
+
+        return sb.toString();
     }
 
     /**
      * Prints server telemetry including number of connections and maximum number of connections.
      */
     @Override
-    public void monitor() {
+    public String monitor() {
         double loadPercentage = ((double) currentConnections / maxConnections) * 100;
         int availableConnections = getMaxConnections() - getCurrentConnections();
 
@@ -101,13 +102,17 @@ public class DatabaseServer extends Server implements Monitorable {
         String activeConnections = getCurrentConnections() + " / " + getMaxConnections();
         String serverLoad = String.format("%.0f", loadPercentage) + "%";
 
-        System.out.println("=== Database Server Telemetry ===");
-        System.out.println("IP-address          : " + getIpAddress());
-        System.out.println("Port                : " + getPort());
-        System.out.println("Status              : " + (getIsRunning() ? "ONLINE" : "OFFLINE"));
-        System.out.println("Active connections  : " + (getIsRunning() ? activeConnections : "N/A"));
-        System.out.println("Available slots     : " + (getIsRunning() ? availableConnections : "N/A"));
-        System.out.println("Server load         : " + (getIsRunning() ? serverLoad : "N/A"));
-        System.out.println("---------------------------------");
+        StringBuilder sb = new StringBuilder();
+
+        sb.append("=== Database Server Telemetry ===\n");
+        sb.append("IP-address          : " + getIpAddress() + "\n");
+        sb.append("Port                : " + getPort() + "\n");
+        sb.append("Status              : " + (getIsRunning() ? "ONLINE" : "OFFLINE") + "\n");
+        sb.append("Active connections  : " + (getIsRunning() ? activeConnections : "N/A") + "\n");
+        sb.append("Available slots     : " + (getIsRunning() ? availableConnections : "N/A") + "\n");
+        sb.append("Server load         : " + (getIsRunning() ? serverLoad : "N/A") + "\n");
+        sb.append("---------------------------------");
+
+        return sb.toString();
     }
 }

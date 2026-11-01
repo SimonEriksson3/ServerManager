@@ -52,26 +52,26 @@ public class BackupServer extends Server implements Monitorable{
      * This version of the method will also check if the backup-server has a working backup.
      */
     @Override
-    public void checkHealth() {
-        super.checkHealth();
+    public String checkHealth() {
+        StringBuilder sb = new StringBuilder();
+
+        sb.append(super.checkHealth() + "\n");
 
         if (!getIsRunning()) {
-            System.out.println("CRITICAL: Backup server is unreachable!");
-            return;
-        }
-
-        if (!getHasActiveBackup()) {
-            System.out.println("CRITICAL: No active backup found! Data loss risk.");
+            sb.append("CRITICAL: Backup server is unreachable!");
+        } else if (!getHasActiveBackup()) {
+            sb.append("CRITICAL: No active backup found! Data loss risk.");
         } else {
-            System.out.println("HEALTH OK: Backup is active and healthy.");
+            sb.append("HEALTH OK: Backup is active and healthy.");
         }
+        return sb.toString();
     }
 
     /**
      * Prints server telemetry including disk usage and status of backup.
      */
     @Override
-    public void monitor() {
+    public String monitor() {
         double backupSizeGb = getBackupSize() / 1024; //Converted from MB to GB
         double diskSizeGb = getDiskSize() / 1024; //Converted from MB to GB
         double diskUsagePercentage = (getBackupSize() / getDiskSize()) * 100; //Disk load percentage
@@ -80,18 +80,22 @@ public class BackupServer extends Server implements Monitorable{
         String diskUsage = String.format("%.1f", diskUsagePercentage) + "% of " + String.format("%.1f", diskSizeGb) + " GB";
         String freeSpace = String.format("%.1f", (diskSizeGb - backupSizeGb)) + " GB remaining";
 
-        System.out.println("=== Backup Server Telemetry ===");
-        System.out.println("IP-address          : " + getIpAddress());
-        System.out.println("Port                : " + getPort());
-        System.out.println("Status              : " + (getIsRunning() ? "ONLINE" : "OFFLINE"));
-        System.out.println("Active Backup       : " + (getIsRunning() ? (getHasActiveBackup() ? "YES" : "NO") : "N/A"));
+        StringBuilder sb = new StringBuilder();
+
+        sb.append("=== Backup Server Telemetry ===\n");
+        sb.append("IP-address          : " + (getIpAddress()) + "\n");
+        sb.append("Port                : " + (getPort()) + "\n");
+        sb.append("Status              : " + (getIsRunning() ? "ONLINE" : "OFFLINE") + "\n");
+        sb.append("Active Backup       : " + (getIsRunning() ? (getHasActiveBackup() ? "YES" : "NO") : "N/A") + "\n");
 
         if (getHasActiveBackup() && getIsRunning()) {
-            System.out.println("Backup Size         : " + String.format("%.1f", backupSizeGb) + " GB ");
+            sb.append("Backup Size         : " + (String.format("%.1f", backupSizeGb) + " GB ") + "\n");
         }
 
-        System.out.println("Disk Usage          : " + (getIsRunning() ? diskUsage : "N/A"));
-        System.out.println("Disk Free Space     : " + (getIsRunning() ? freeSpace : "N/A"));
-        System.out.println("-------------------------------");
+        sb.append("Disk Usage          : " + (getIsRunning() ? diskUsage : "N/A") + "\n");
+        sb.append("Disk Free Space     : " + (getIsRunning() ? freeSpace : "N/A") + "\n");
+        sb.append("-------------------------------");
+
+        return sb.toString();
     }
 }

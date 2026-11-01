@@ -185,7 +185,12 @@ public class UserInterface {
         ArrayList<Server> selectedServers = selectAllOrOne("Ping");
 
         if (selectedServers != null) {
-            manager.pingServers(selectedServers);
+            for (Server server : selectedServers) {
+                System.out.println(); // Tom rad för snyggare output
+                System.out.println("Pinging " + server.getServerType() + " at " + server.getIpAddress() + "...");
+                sleep();
+                System.out.println(server.ping());
+            }
         }
     }
 
@@ -198,7 +203,12 @@ public class UserInterface {
         ArrayList<Server> selectedServers = selectAllOrOne("Run health check on");
 
         if (selectedServers != null) {
-            manager.serverHealthChecks(selectedServers);
+            ArrayList<String> healthResults = manager.getHealthData(selectedServers);
+
+            for (String result : healthResults) {
+                System.out.println();
+                System.out.println(result);
+            }
         }
     }
 
@@ -221,10 +231,15 @@ public class UserInterface {
             String confirmationMessage = "Are you sure you want to " + action.toLowerCase() + " the selected " + serverLabel + "?";
 
             if (getConfirmation(confirmationMessage)) {
+                ArrayList<String> statusResults;
                 if (shouldRun) {
-                    manager.startServers(selectedServers);
+                    statusResults = manager.startServers(selectedServers);
                 } else {
-                    manager.stopServers(selectedServers);
+                    statusResults = manager.stopServers(selectedServers);
+                }
+                System.out.println();
+                for(String result : statusResults) {
+                    System.out.println(result);
                 }
             }
         }
@@ -239,7 +254,10 @@ public class UserInterface {
         ArrayList<Server> selectedServers = selectAllOrOne("Monitor");
 
         if (selectedServers != null) {
-            manager.monitorServers(selectedServers);
+            ArrayList<String> monitoringResults = manager.getMonitoringData(selectedServers);
+            for (String result : monitoringResults) {
+                System.out.println(result);
+            }
         }
     }
 
@@ -426,6 +444,14 @@ public class UserInterface {
         }
 
         return selectedServers;
+    }
+
+    private void sleep() {
+        try {
+            Thread.sleep(500);
+        } catch (InterruptedException e) {
+            System.out.println(e.getMessage());
+        }
     }
 
     /**

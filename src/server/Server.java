@@ -64,46 +64,33 @@ public abstract class Server {
      * This method sets the status of the server, whether it should run or not.
      * @param newStatus true to start the server, false to stop.
      */
-    public void setServerStatus(boolean newStatus) {
+    public String setServerStatus(boolean newStatus) {
         if (getIsRunning() == newStatus) {
-            System.out.println(getServerType() + " (" + getIpAddress() + ") is already " + (newStatus ? "running." : "stopped."));
-            return;
+            return getServerType() + " (" + getIpAddress() + ") is already " + (newStatus ? "running." : "stopped.");
         }
 
         this.isRunning = newStatus;
-        System.out.println(getServerType() + " (" + getIpAddress() + ") is now " + (getIsRunning() ? "ONLINE." : "OFFLINE."));
+        return getServerType() + " (" + getIpAddress() + ") is now " + (getIsRunning() ? "ONLINE." : "OFFLINE.");
     }
 
 
     /**
      * Simulates if the server is healthy.
      */
-    public void checkHealth() {
-        System.out.println("Running health diagnostic for " + getServerType() + " " + getIpAddress() + " on port " + getPort() + ".");
+    public String checkHealth() {
+        return "Running health diagnostic for " + getServerType() + " " + getIpAddress() + " on port " + getPort() + ".";
     }
 
     /**
      * Simulates pinging the server.
      */
-    public void ping() {
-        System.out.println("Pinging " + getServerType() + " at " + getIpAddress() + "...");
-
-        sleep();
+    public String ping() {
 
         if (!getIsRunning()) {
-            System.out.println("Request timed out. Server is offline");
-            return;
-        }
-
-        int latency = (int) (Math.random() * 42) + 4; //Random latency between 4-45ms
-        System.out.println("Reply from " + getIpAddress() + ": time=" + latency + "ms TTL=64");
-    }
-
-    private void sleep() {
-        try {
-            Thread.sleep(500);
-        } catch (InterruptedException e) {
-            System.out.println(e.getMessage());
+            return "Request timed out. Server is offline.";
+        } else {
+            int latency = (int) (Math.random() * 42) + 4; // Random latency between 4-45ms
+            return "Reply from " + getIpAddress() + ": time=" + latency + "ms TTL=64";
         }
     }
 
